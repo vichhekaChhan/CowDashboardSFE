@@ -17,7 +17,7 @@ import {
 import logoImg from './assets/custom-logo.jpg';
 import cowIcon from './assets/cow.png';
 import { Home } from './pages/Home';
-import { Devices, Scale } from './pages/Devices';
+import { Devices, Scale as ScaleInterface } from './pages/Devices';
 import { Herd } from './pages/Herd';
 import { Settings } from './pages/Settings';
 import { NavItem } from './components/NavItem';
@@ -64,7 +64,7 @@ export default function App() {
   const { t } = useTranslation();
   const { currentLanguage, toggleLanguage } = useLanguage();
   
-  const [scalesData, setScalesData] = useState<Scale[]>([]);
+  const [scalesData, setScalesData] = useState<ScaleInterface[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [notifications, setNotifications] = useState([
@@ -79,7 +79,7 @@ export default function App() {
       try {
         const res = await fetch('/api/devices');
         if (!res.ok) return;
-        const newScales: Scale[] = await res.json();
+        const newScales: ScaleInterface[] = await res.json();
         
         setScalesData(prevScales => {
           // Check for newly added devices
