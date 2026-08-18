@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Wifi, WifiOff, ArrowLeft, Activity, RefreshCw, CheckCircle2 } from 'lucide-react';
 
-interface Scale {
+export interface Scale {
   id: string;
   name: string;
   status: string;
@@ -10,8 +10,6 @@ interface Scale {
   lastSync: string;
   currentReading: string;
 }
-
-const initialMockScales: Scale[] = [];
 
 const mockLogs = [
   { id: 1, time: '10:42 AM', type: 'Weight Recorded', details: 'Tag #8492 - 1,240 lbs', status: 'success' },
@@ -21,15 +19,15 @@ const mockLogs = [
 ];
 
 interface DevicesProps {
+  scalesData: Scale[];
   activeScaleId?: string | null;
   setActiveScaleId?: (id: string | null) => void;
   weighingCowId?: string | null;
   setWeighingCowId?: (id: string | null) => void;
 }
 
-export function Devices({ activeScaleId = null, setActiveScaleId = () => {}, weighingCowId = null, setWeighingCowId = () => {} }: DevicesProps) {
+export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = () => {}, weighingCowId = null, setWeighingCowId = () => {} }: DevicesProps) {
   const { t } = useTranslation();
-  const [scalesData, setScalesData] = useState(initialMockScales);
   
   const selectedScale = activeScaleId ? scalesData.find(s => s.id === activeScaleId) || null : null;
 

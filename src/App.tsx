@@ -17,7 +17,7 @@ import {
 import logoImg from './assets/custom-logo.jpg';
 import cowIcon from './assets/cow.png';
 import { Home } from './pages/Home';
-import { Devices } from './pages/Devices';
+import { Devices, Scale } from './pages/Devices';
 import { Herd } from './pages/Herd';
 import { Settings } from './pages/Settings';
 import { NavItem } from './components/NavItem';
@@ -63,12 +63,54 @@ export default function App() {
   };
   const { t } = useTranslation();
   const { currentLanguage, toggleLanguage } = useLanguage();
+  
+  const [scalesData, setScalesData] = useState<Scale[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const notifications = [
+  const [notifications, setNotifications] = useState([
     { id: 1, type: 'warning', text: 'TAG-8921 is overweight (1450 lbs)', time: '10 mins ago' },
     { id: 2, type: 'error', text: 'Scale SCALE-02 is offline', time: '1 hour ago' },
     { id: 3, type: 'info', text: 'Weekly report generated successfully', time: '2 hours ago' },
-  ];
+  ]);
+
+  // Polling logic for when ESP32 or hardware connects
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/devices');
+        if (!res.ok) return;
+        const newScales: Scale[] = await res.json();
+        
+        setScalesData(prevScales => {
+          // Check for newly added devices
+          newScales.forEach(newScale => {
+            const exists = prevScales.find(s => s.id === newScale.id);
+            if (!exists) {
+              // Trigger Toast Notification
+              setToastMessage(`New device connected: ${newScale.name}`);
+              setTimeout(() => setToastMessage(null), 5000);
+              
+              // Add to notification center
+              setNotifications(prev => [
+                {
+                  id: Date.now(),
+                  type: 'info',
+                  text: `New device connected: ${newScale.name} (${newScale.id})`,
+                  time: 'Just now'
+                },
+                ...prev
+              ]);
+            }
+          });
+          return newScales;
+        });
+      } catch (err) {
+        // Silent fail on polling if backend isn't up
+      }
+    }, 3000);
+
+    return () => clearInterval(pollInterval);
+  }, []);
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'} flex font-sans transition-colors duration-200`}>
@@ -195,7 +237,7 @@ export default function App() {
         {/* Dynamic View Rendering */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-10 mb-16 md:mb-0">
           {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
-          {activeTab === 'devices' && <Devices activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
+          {activeTab === 'devices' && <Devices scalesData={scalesData} activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
           {activeTab === 'herd' && <Herd onNavigateToScale={navigateToScale} />}
           {activeTab === 'settings' && <Settings />}
         </div>
@@ -220,6 +262,15 @@ export default function App() {
           <span className="text-[10px] font-medium">{t('nav.settings', 'Settings')}</span>
         </button>
       </div>
+      {/* Global Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-20 md:bottom-6 right-6 z-[100] animate-in slide-in-from-bottom-5 fade-in duration-300">
+          <div className="bg-gray-900 dark:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-lg font-medium flex items-center space-x-3">
+            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span>{toastMessage}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
