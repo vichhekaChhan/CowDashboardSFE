@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown, HelpCircle, Phone, Mail } from 'lucide-react';
+import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown, HelpCircle, Phone, Mail, Lock, Check } from 'lucide-react';
 
 export function Settings() {
   const { t } = useTranslation();
@@ -208,124 +208,71 @@ export function Settings() {
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('settings.wifi.title', 'Microcontroller WiFi Configuration')}</h3>
-                  <p className="text-gray-500 dark:text-gray-400">{t('settings.wifi.description', 'Enter the WiFi credentials that your smart scales will use to connect to the network. Generate a config file to flash onto your devices.')}</p>
+                  <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('settings.wifi.title', 'Network Settings')}</h3>
+                  <p className="text-gray-500 dark:text-gray-400">{t('settings.wifi.description', 'Manage your active WiFi connection and available networks.')}</p>
                 </div>
                 <div className="hidden sm:flex w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 items-center justify-center text-green-600 dark:text-green-400 shrink-0">
                   <Wifi size={24} />
                 </div>
               </div>
               
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const configStr = JSON.stringify(formData.wifi, null, 2);
-                const encodedUri = encodeURI("data:text/json;charset=utf-8," + configStr);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "scale_wifi_config.json");
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                handleSave(e);
-              }} className="space-y-6 max-w-lg">
-                <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 transition-colors">
-                  <div className="space-y-5">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('settings.wifi.ssid', 'Network Name (SSID)')}</label>
-                      <div className="relative">
-                        <Wifi className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500" size={18} />
-                        <input 
-                          type="text" 
-                          placeholder="e.g. Farm_Network_2G"
-                          value={formData.wifi.ssid}
-                          onChange={(e) => updateNestedState('wifi', 'ssid', e.target.value)}
-                          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
-                          required
-                        />
+              <div className="space-y-6 max-w-lg mt-6">
+                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+                  
+                  {/* Current Connection */}
+                  <div className="p-4 border-b border-gray-200 dark:border-gray-600 bg-green-50/50 dark:bg-green-900/10">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Current Connection</p>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-3">
+                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
+                          <Wifi size={20} />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 dark:text-white">Camtech Student</h4>
+                          <p className="text-sm text-green-600 dark:text-green-400 flex items-center mt-0.5">
+                            <Check size={14} className="mr-1" />
+                            Connected, secured
+                          </p>
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="relative" ref={securityDropdownRef}>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{t('settings.wifi.security', 'Security Type')}</label>
-                      <button
-                        type="button"
-                        onClick={() => setIsSecurityDropdownOpen(!isSecurityDropdownOpen)}
-                        className="flex items-center justify-between w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-green-500 font-sans cursor-pointer transition-shadow"
-                      >
-                        <span>
-                          {formData.wifi.securityType === 'WPA2' ? 'WPA2 Personal' :
-                           formData.wifi.securityType === 'WPA3' ? 'WPA3 Personal' :
-                           formData.wifi.securityType === 'WEP' ? 'WEP' :
-                           'Open (No Password)'}
-                        </span>
-                        <ChevronDown size={18} className={`text-gray-400 transition-transform ${isSecurityDropdownOpen ? 'rotate-180' : ''}`} />
+                      <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                        Disconnect
                       </button>
-                      
-                      {isSecurityDropdownOpen && (
-                        <div className="absolute top-full left-0 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-10 animate-in fade-in slide-in-from-top-2 duration-200">
-                          {[
-                            { value: 'WPA2', label: 'WPA2 Personal' },
-                            { value: 'WPA3', label: 'WPA3 Personal' },
-                            { value: 'WEP', label: 'WEP' },
-                            { value: 'Open', label: 'Open (No Password)' }
-                          ].map(option => (
-                            <button
-                              key={option.value}
-                              type="button"
-                              onClick={() => {
-                                updateNestedState('wifi', 'securityType', option.value);
-                                setIsSecurityDropdownOpen(false);
-                              }}
-                              className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                                formData.wifi.securityType === option.value 
-                                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium' 
-                                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                              }`}
-                            >
-                              {option.label}
-                            </button>
-                          ))}
-                        </div>
-                      )}
                     </div>
-
-                    {formData.wifi.securityType !== 'Open' && (
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('settings.wifi.password', 'WiFi Password')}</label>
-                        </div>
-                        <div className="relative">
-                          <input 
-                            type={formData.wifi.showPassword ? "text" : "password"}
-                            placeholder="••••••••"
-                            value={formData.wifi.password}
-                            onChange={(e) => updateNestedState('wifi', 'password', e.target.value)}
-                            className="w-full px-4 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-shadow"
-                            required
-                          />
-                          <button
-                            type="button"
-                            onClick={() => updateNestedState('wifi', 'showPassword', !formData.wifi.showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors text-sm font-medium"
-                          >
-                            {formData.wifi.showPassword ? "Hide" : "Show"}
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                </div>
 
-                <div className="pt-2">
-                  <button type="submit" className="w-full flex items-center justify-center space-x-2 bg-gray-900 dark:bg-gray-100 hover:bg-gray-800 dark:hover:bg-white text-white dark:text-gray-900 px-6 py-3 rounded-xl font-medium transition-colors shadow-sm">
-                    <Save size={18} />
-                    <span>{t('settings.wifi.generateBtn', 'Download Config File')}</span>
-                  </button>
-                  <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-3">
-                    This will download a secure .json file you can upload to your scale hardware.
-                  </p>
+                  {/* Available Networks */}
+                  <div className="p-4">
+                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Available Networks</p>
+                    <div className="space-y-1">
+                      {[
+                        { name: 'Farm_Network_5G', secured: true, signal: 'strong' },
+                        { name: 'Barn_Router_01', secured: true, signal: 'medium' },
+                        { name: 'Guest_WiFi', secured: false, signal: 'weak' }
+                      ].map((net, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-3 hover:bg-white dark:hover:bg-gray-800 rounded-xl cursor-pointer transition-colors group">
+                          <div className="flex items-center space-x-3">
+                            <div className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+                              <Wifi size={20} className={net.signal === 'weak' ? 'opacity-50' : net.signal === 'medium' ? 'opacity-80' : ''} />
+                            </div>
+                            <div>
+                              <h4 className="font-medium text-gray-800 dark:text-gray-200">{net.name}</h4>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{net.secured ? 'Secured' : 'Open'}</p>
+                            </div>
+                          </div>
+                          {net.secured && <Lock size={14} className="text-gray-400" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
                 </div>
-              </form>
+                
+                <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-2">
+                  <p>Auto-connect is enabled for known networks.</p>
+                  <button className="text-green-600 dark:text-green-400 font-medium hover:underline">Network Settings</button>
+                </div>
+              </div>
             </div>
           )}
 
