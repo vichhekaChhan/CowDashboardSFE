@@ -112,6 +112,21 @@ export default function App() {
     return () => clearInterval(pollInterval);
   }, []);
 
+  const handleRemoveDevice = async (id: string) => {
+    // Optimistic update
+    setScalesData(prev => prev.filter(scale => scale.id !== id));
+    setToastMessage("Device removed successfully");
+    setTimeout(() => setToastMessage(null), 3000);
+    
+    try {
+      await fetch(`/api/devices/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (err) {
+      console.error('Failed to delete device', err);
+    }
+  };
+
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-800'} flex font-sans transition-colors duration-200`}>
       {/* Sidebar */}
@@ -237,7 +252,7 @@ export default function App() {
         {/* Dynamic View Rendering */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-10 mb-16 md:mb-0">
           {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
-          {activeTab === 'devices' && <Devices scalesData={scalesData} activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
+          {activeTab === 'devices' && <Devices scalesData={scalesData} onRemoveDevice={handleRemoveDevice} activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
           {activeTab === 'herd' && <Herd onNavigateToScale={navigateToScale} />}
           {activeTab === 'settings' && <Settings />}
         </div>

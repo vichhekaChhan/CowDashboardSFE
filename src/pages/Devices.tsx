@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Wifi, WifiOff, ArrowLeft, Activity, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { Wifi, WifiOff, ArrowLeft, Activity, RefreshCw, CheckCircle2, Trash2 } from 'lucide-react';
 
 export interface Scale {
   id: string;
@@ -24,9 +24,10 @@ interface DevicesProps {
   setActiveScaleId?: (id: string | null) => void;
   weighingCowId?: string | null;
   setWeighingCowId?: (id: string | null) => void;
+  onRemoveDevice?: (id: string) => void;
 }
 
-export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = () => {}, weighingCowId = null, setWeighingCowId = () => {} }: DevicesProps) {
+export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = () => {}, weighingCowId = null, setWeighingCowId = () => {}, onRemoveDevice }: DevicesProps) {
   const { t } = useTranslation();
   
   const selectedScale = activeScaleId ? scalesData.find(s => s.id === activeScaleId) || null : null;
@@ -34,25 +35,43 @@ export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = (
   if (selectedScale) {
     return (
       <div className="h-full flex flex-col animate-in fade-in slide-in-from-right-4 duration-300">
-        <div className="flex items-center space-x-4 mb-6">
-          <button 
-            onClick={() => {
-              setActiveScaleId(null);
-              setWeighingCowId?.(null);
-            }}
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
-          >
-            <ArrowLeft size={24} />
-          </button>
-          <div>
-            <div className="flex items-center space-x-3">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedScale.name}</h2>
-              <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${selectedScale.status === 'online' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
-                {selectedScale.status === 'online' ? t('devices.statusOnline') : t('devices.statusOffline')}
-              </span>
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-4">
+            <button 
+              onClick={() => {
+                setActiveScaleId(null);
+                setWeighingCowId?.(null);
+              }}
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-500 dark:text-gray-400"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <div>
+              <div className="flex items-center space-x-3">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{selectedScale.name}</h2>
+                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${selectedScale.status === 'online' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'}`}>
+                  {selectedScale.status === 'online' ? t('devices.statusOnline') : t('devices.statusOffline')}
+                </span>
+              </div>
+              <p className="text-gray-500 dark:text-gray-400 font-mono text-sm mt-1">{selectedScale.id}</p>
             </div>
-            <p className="text-gray-500 dark:text-gray-400 font-mono text-sm mt-1">{selectedScale.id}</p>
           </div>
+          
+          {onRemoveDevice && (
+            <button 
+              onClick={(e) => {
+                e.stopPropagation();
+                if (window.confirm(`Are you sure you want to remove ${selectedScale.name}?`)) {
+                  onRemoveDevice(selectedScale.id);
+                  setActiveScaleId(null);
+                }
+              }}
+              className="p-2 flex items-center gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+            >
+              <Trash2 size={20} />
+              <span className="font-medium hidden sm:inline">Remove Device</span>
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
@@ -169,8 +188,23 @@ export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = (
                   <h3 className="font-bold text-lg text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">{scale.name}</h3>
                   <p className="text-sm text-gray-500 dark:text-gray-400 font-mono mt-1">{scale.id}</p>
                 </div>
-                <div className={`p-2 rounded-lg ${scale.status === 'online' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}>
-                  {scale.status === 'online' ? <Wifi size={20} /> : <WifiOff size={20} />}
+                <div className="flex gap-2">
+                  <div className={`p-2 rounded-lg ${scale.status === 'online' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'}`}>
+                    {scale.status === 'online' ? <Wifi size={20} /> : <WifiOff size={20} />}
+                  </div>
+                  {onRemoveDevice && (
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Are you sure you want to remove ${scale.name}?`)) {
+                          onRemoveDevice(scale.id);
+                        }
+                      }}
+                      className="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  )}
                 </div>
               </div>
 
