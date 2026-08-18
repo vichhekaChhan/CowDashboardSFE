@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown } from 'lucide-react';
+import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown, HelpCircle, Phone, Mail } from 'lucide-react';
 
 export function Settings() {
   const { t } = useTranslation();
@@ -120,6 +120,17 @@ export function Settings() {
             >
               <Bell size={20} className={activeTab === 'notifications' ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'} />
               <span>{t('settings.notifications.tab', 'Notifications')}</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('help')}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl font-medium transition-colors ${
+                activeTab === 'help'
+                  ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                  : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+              }`}
+            >
+              <HelpCircle size={20} className={activeTab === 'help' ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-500'} />
+              <span>{t('settings.help.tab', 'Help & Support')}</span>
             </button>
           </nav>
         </div>
@@ -383,6 +394,46 @@ export function Settings() {
                   </button>
                 </div>
               </form>
+            </div>
+          )}
+          {activeTab === 'help' && (
+            <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">{t('settings.help.title', 'Help & Support')}</h3>
+              <p className="text-gray-500 dark:text-gray-400 mb-8">{t('settings.help.subtitle', 'Get help with your hardware or software.')}</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="bg-green-50 dark:bg-green-900/20 p-6 rounded-2xl border border-green-100 dark:border-green-900/50 flex flex-col items-center text-center transition-colors">
+                  <div className="w-12 h-12 bg-green-100 dark:bg-green-800 rounded-full flex items-center justify-center mb-4">
+                    <Phone className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-2">Call Support</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Available Mon-Fri, 9am - 5pm EST</p>
+                  <a href="tel:+1-800-COW-FIT1" className="text-green-600 dark:text-green-400 font-bold hover:underline">1-800-COW-FIT1</a>
+                </div>
+                
+                <div className="bg-gray-50 dark:bg-gray-700/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700 flex flex-col items-center text-center transition-colors">
+                  <div className="w-12 h-12 bg-gray-200 dark:bg-gray-600 rounded-full flex items-center justify-center mb-4">
+                    <Mail className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <h4 className="font-bold text-gray-900 dark:text-white mb-2">Email Us</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">We usually respond within 24 hours.</p>
+                  <a href="mailto:support@cowfit.io" className="text-green-600 dark:text-green-400 font-bold hover:underline">support@cowfit.io</a>
+                </div>
+              </div>
+              
+              <div className="border-t border-gray-100 dark:border-gray-700 pt-8">
+                <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-4">Frequently Asked Questions</h4>
+                <div className="space-y-4">
+                  <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors">
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-1">How do I reconnect a scale?</h5>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Go to the WiFi Configuration tab, generate a new config file, and place it on a USB drive plugged into your scale.</p>
+                  </div>
+                  <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl border border-gray-100 dark:border-gray-700 transition-colors">
+                    <h5 className="font-medium text-gray-900 dark:text-white mb-1">Why is my cow marked as critical?</h5>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">A cow is marked critical if its weight drops more than 5% in a single week. Check the Herd tab for historical data.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

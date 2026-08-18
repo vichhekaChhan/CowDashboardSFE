@@ -11,7 +11,8 @@ import {
   AlertTriangle,
   Info,
   Moon,
-  Sun
+  Sun,
+  Wifi
 } from 'lucide-react';
 import logoImg from './assets/custom-logo.jpg';
 import cowIcon from './assets/cow.png';
@@ -192,13 +193,33 @@ export default function App() {
         </header>
 
         {/* Dynamic View Rendering */}
-        <div className="flex-1 overflow-auto p-6 lg:p-10">
+        <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-10 mb-16 md:mb-0">
           {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
           {activeTab === 'devices' && <Devices activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
           {activeTab === 'herd' && <Herd onNavigateToScale={navigateToScale} />}
           {activeTab === 'settings' && <Settings />}
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <div className={`md:hidden fixed bottom-0 left-0 right-0 h-16 ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} border-t flex items-center justify-around z-50 transition-colors duration-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]`}>
+        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${activeTab === 'home' ? 'text-green-600' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <LayoutDashboard size={20} />
+          <span className="text-[10px] font-medium">{t('nav.dashboard', 'Home')}</span>
+        </button>
+        <button onClick={() => setActiveTab('herd')} className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${activeTab === 'herd' ? 'text-green-600' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <div className="w-5 h-5 bg-current" style={{ WebkitMaskImage: `url(${cowIcon})`, maskImage: `url(${cowIcon})`, WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center' }} />
+          <span className="text-[10px] font-medium">{t('nav.herd', 'Herd')}</span>
+        </button>
+        <button onClick={() => setActiveTab('devices')} className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${activeTab === 'devices' ? 'text-green-600' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <Wifi size={20} />
+          <span className="text-[10px] font-medium">{t('nav.devices', 'Devices')}</span>
+        </button>
+        <button onClick={() => setActiveTab('settings')} className={`flex flex-col items-center justify-center w-full h-full space-y-1 ${activeTab === 'settings' ? 'text-green-600' : isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+          <SettingsIcon size={20} />
+          <span className="text-[10px] font-medium">{t('nav.settings', 'Settings')}</span>
+        </button>
+      </div>
     </div>
   );
 }
