@@ -1,12 +1,43 @@
 import { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown, HelpCircle, Phone, Mail, Lock, Check } from 'lucide-react';
+import { User, Wifi, Save, CheckCircle2, Bell, ChevronDown, HelpCircle, Phone, Mail, Lock, Check, AlertTriangle } from 'lucide-react';
 
 export function Settings() {
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
   const [showSuccess, setShowSuccess] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  // Real WiFi State
+  const [isScanningWifi, setIsScanningWifi] = useState(false);
+  const [wifiError, setWifiError] = useState<string | null>(null);
+  const [currentWifi, setCurrentWifi] = useState<any>(null);
+  const [availableNetworks, setAvailableNetworks] = useState<any[]>([]);
+
+  const fetchWifiNetworks = async () => {
+    setIsScanningWifi(true);
+    setWifiError(null);
+    try {
+      // Hardware endpoints for ESP32/Raspberry Pi
+      const res = await fetch('/api/wifi/scan');
+      if (!res.ok) throw new Error('Failed to fetch networks');
+      const data = await res.json();
+      
+      setCurrentWifi(data.currentConnection || null);
+      setAvailableNetworks(data.networks || []);
+    } catch (err) {
+      console.error("WiFi scan failed:", err);
+      setWifiError("Could not detect hardware networks. Ensure you are connected to the device.");
+    } finally {
+      setIsScanningWifi(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'wifi') {
+      fetchWifiNetworks();
+    }
+  }, [activeTab]);
   
   const [isSecurityDropdownOpen, setIsSecurityDropdownOpen] = useState(false);
   const securityDropdownRef = useRef<HTMLDivElement>(null);
@@ -219,53 +250,83 @@ export function Settings() {
               <div className="space-y-6 max-w-lg mt-6">
                 <div className="bg-gray-50 dark:bg-gray-700/50 rounded-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
                   
-                  {/* Current Connection */}
-                  <div className="p-4 border-b border-gray-200 dark:border-gray-600 bg-green-50/50 dark:bg-green-900/10">
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Current Connection</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
-                          <Wifi size={20} />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-gray-900 dark:text-white">Camtech Student</h4>
-                          <p className="text-sm text-green-600 dark:text-green-400 flex items-center mt-0.5">
-                            <Check size={14} className="mr-1" />
-                            Connected, secured
-                          </p>
-                        </div>
+                  {isScanningWifi ? (
+                    <div className="p-8 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+                      <div className="animate-pulse mb-4">
+                        <Wifi size={32} className="text-green-500 opacity-50" />
                       </div>
-                      <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
-                        Disconnect
+                      <p>Scanning for nearby networks...</p>
+                    </div>
+                  ) : wifiError ? (
+                    <div className="p-6 bg-red-50 dark:bg-red-900/10 border-b border-red-100 dark:border-red-900/50 text-center">
+                      <AlertTriangle className="w-8 h-8 text-red-500 mx-auto mb-3" />
+                      <h4 className="text-red-800 dark:text-red-400 font-bold mb-1">Hardware Connection Error</h4>
+                      <p className="text-sm text-red-600 dark:text-red-300">{wifiError}</p>
+                      <button onClick={fetchWifiNetworks} className="mt-4 px-4 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-lg text-sm font-medium hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors">
+                        Retry Scan
                       </button>
                     </div>
-                  </div>
-
-                  {/* Available Networks */}
-                  <div className="p-4">
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Available Networks</p>
-                    <div className="space-y-1">
-                      {[
-                        { name: 'Farm_Network_5G', secured: true, signal: 'strong' },
-                        { name: 'Barn_Router_01', secured: true, signal: 'medium' },
-                        { name: 'Guest_WiFi', secured: false, signal: 'weak' }
-                      ].map((net, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-3 hover:bg-white dark:hover:bg-gray-800 rounded-xl cursor-pointer transition-colors group">
-                          <div className="flex items-center space-x-3">
-                            <div className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
-                              <Wifi size={20} className={net.signal === 'weak' ? 'opacity-50' : net.signal === 'medium' ? 'opacity-80' : ''} />
+                  ) : (
+                    <>
+                      {/* Current Connection */}
+                      <div className="p-4 border-b border-gray-200 dark:border-gray-600 bg-green-50/50 dark:bg-green-900/10">
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Current Connection</p>
+                        {currentWifi ? (
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
+                                <Wifi size={20} />
+                              </div>
+                              <div>
+                                <h4 className="font-bold text-gray-900 dark:text-white">{currentWifi.ssid || 'Connected Network'}</h4>
+                                <p className="text-sm text-green-600 dark:text-green-400 flex items-center mt-0.5">
+                                  <Check size={14} className="mr-1" />
+                                  Connected{currentWifi.secured ? ', secured' : ''}
+                                </p>
+                              </div>
                             </div>
-                            <div>
-                              <h4 className="font-medium text-gray-800 dark:text-gray-200">{net.name}</h4>
-                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{net.secured ? 'Secured' : 'Open'}</p>
-                            </div>
+                            <button className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors shadow-sm">
+                              Disconnect
+                            </button>
                           </div>
-                          {net.secured && <Lock size={14} className="text-gray-400" />}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                        ) : (
+                          <div className="text-gray-500 dark:text-gray-400 text-sm py-2">
+                            No active connection.
+                          </div>
+                        )}
+                      </div>
 
+                      {/* Available Networks */}
+                      <div className="p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Available Networks</p>
+                          <button onClick={fetchWifiNetworks} className="text-xs font-medium text-green-600 dark:text-green-400 hover:underline">Refresh</button>
+                        </div>
+                        <div className="space-y-1">
+                          {availableNetworks.length > 0 ? (
+                            availableNetworks.map((net, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-3 hover:bg-white dark:hover:bg-gray-800 rounded-xl cursor-pointer transition-colors group">
+                                <div className="flex items-center space-x-3">
+                                  <div className="text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors">
+                                    <Wifi size={20} className={net.signalStrength < -70 ? 'opacity-50' : net.signalStrength < -50 ? 'opacity-80' : ''} />
+                                  </div>
+                                  <div>
+                                    <h4 className="font-medium text-gray-800 dark:text-gray-200">{net.ssid}</h4>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{net.secured ? 'Secured' : 'Open'}</p>
+                                  </div>
+                                </div>
+                                {net.secured && <Lock size={14} className="text-gray-400" />}
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-6 text-sm text-gray-500 dark:text-gray-400">
+                              No networks found.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
                 
                 <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 px-2">
