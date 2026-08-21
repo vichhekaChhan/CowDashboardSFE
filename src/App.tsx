@@ -79,7 +79,15 @@ export default function App() {
       try {
         const res = await fetch('/api/devices');
         if (!res.ok) return;
-        const newScales: ScaleInterface[] = await res.json();
+        const rawDevices = await res.json();
+        const newScales: ScaleInterface[] = rawDevices.map((d: any) => ({
+          id: d.deviceId || d.id,
+          name: d.name || 'Unknown Device',
+          status: d.status || 'offline',
+          battery: d.battery || 100,
+          lastSync: d.lastSeen ? new Date(d.lastSeen).toLocaleTimeString() : 'Unknown',
+          currentReading: d.currentReading || '0 lbs'
+        }));
         
         setScalesData(prevScales => {
           // Check for newly added devices

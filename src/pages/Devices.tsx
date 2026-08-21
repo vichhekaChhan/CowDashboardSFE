@@ -93,10 +93,10 @@ export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = (
               <Activity size={32} className="text-gray-400 dark:text-gray-500 mb-4" />
               <p className="text-sm uppercase tracking-widest font-semibold text-gray-500 dark:text-gray-400 mb-2">{t('devices.liveReading', 'Live Reading')}</p>
               <div className="text-6xl font-bold text-gray-900 dark:text-white font-mono tracking-tight mb-2">
-                {selectedScale.currentReading.split(' ')[0]}
+                {String(selectedScale.currentReading || '0 lbs').split(' ')[0]}
               </div>
               <p className="text-xl text-gray-500 dark:text-gray-400 font-medium mb-8">
-                {selectedScale.currentReading.split(' ')[1] || 'lbs'}
+                {String(selectedScale.currentReading || '0 lbs').split(' ')[1] || 'lbs'}
               </p>
               
               <div className="w-full flex space-x-3">
@@ -224,8 +224,8 @@ export function Devices({ scalesData, activeScaleId = null, setActiveScaleId = (
               <div className="pt-2">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wider font-semibold">{t('devices.currentReading')}</p>
                 <div className="flex items-baseline space-x-2">
-                  <span className="text-3xl font-bold text-gray-900 dark:text-white">{scale.currentReading.split(' ')[0]}</span>
-                  <span className="text-gray-500 dark:text-gray-400 font-medium">{scale.currentReading.split(' ')[1] || ''}</span>
+                  <span className="text-3xl font-bold text-gray-900 dark:text-white">{String(scale.currentReading || '0 lbs').split(' ')[0]}</span>
+                  <span className="text-gray-500 dark:text-gray-400 font-medium">{String(scale.currentReading || '0 lbs').split(' ')[1] || ''}</span>
                 </div>
               </div>
             </div>
