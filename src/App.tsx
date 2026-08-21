@@ -251,10 +251,12 @@ export default function App() {
 
         {/* Dynamic View Rendering */}
         <div className="flex-1 overflow-auto p-4 md:p-6 lg:p-10 mb-16 md:mb-0">
-          {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
-          {activeTab === 'devices' && <Devices scalesData={scalesData} onRemoveDevice={handleRemoveDevice} activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
-          {activeTab === 'herd' && <Herd onNavigateToScale={navigateToScale} />}
-          {activeTab === 'settings' && <Settings />}
+          <div key={activeTab} className="animate-in fade-in slide-in-from-bottom-2 duration-300 h-full">
+            {activeTab === 'home' && <Home onNavigate={setActiveTab} />}
+            {activeTab === 'devices' && <Devices scalesData={scalesData} onRemoveDevice={handleRemoveDevice} activeScaleId={activeScaleId} setActiveScaleId={setActiveScaleId} weighingCowId={weighingCowId} setWeighingCowId={setWeighingCowId} />}
+            {activeTab === 'herd' && <Herd onNavigateToScale={navigateToScale} />}
+            {activeTab === 'settings' && <Settings />}
+          </div>
         </div>
       </main>
 

@@ -169,6 +169,9 @@ export function Home({ onNavigate }: HomeProps) {
                   strokeWidth={3} 
                   fillOpacity={1} 
                   fill="url(#colorWeight)" 
+                  isAnimationActive={true}
+                  animationDuration={800}
+                  animationEasing="ease-in-out"
                   activeDot={{ r: 6, fill: '#22c55e', stroke: '#ffffff', strokeWidth: 3, style: { filter: 'drop-shadow(0px 2px 4px rgba(34,197,94,0.4))', transition: 'all 0.2s ease' } }}
                 />
               </AreaChart>
