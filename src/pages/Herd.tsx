@@ -46,7 +46,33 @@ export function Herd({ onNavigateToScale }: HerdProps) {
   const [breedFilter, setBreedFilter] = useState('All');
   const filterRef = useRef<HTMLDivElement>(null);
 
+  const fetchCows = async () => {
+    try {
+      const res = await fetch('/api/cows');
+      if (res.ok) {
+        const data = await res.json();
+        const mappedCows = data.map((cow: any) => ({
+          id: cow.cowId,
+          weight: cow.latestWeight || 1000, 
+          status: 'normal',
+          lastSync: new Date(cow.updatedAt || cow.createdAt).toLocaleDateString(),
+          trend: 'stable',
+          age: cow.birthDate ? Math.floor((new Date().getTime() - new Date(cow.birthDate).getTime()) / (1000 * 60 * 60 * 24 * 365.25)) + ' yrs' : 'N/A',
+          breed: cow.breed,
+          health: 'Good',
+          gender: cow.gender
+        }));
+        if (mappedCows.length > 0) {
+          setHerdData(mappedCows);
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching cows:', e);
+    }
+  };
+
   useEffect(() => {
+    fetchCows();
     function handleClickOutside(event: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setShowFilters(false);
@@ -372,19 +398,37 @@ export function Herd({ onNavigateToScale }: HerdProps) {
             <form className="p-6 space-y-4" onSubmit={(e) => { 
               e.preventDefault(); 
               const formData = new FormData(e.currentTarget);
-              const newCow = {
-                id: formData.get('tagId') as string,
+              
+              const ageStr = formData.get('age') as string;
+              let birthDate = new Date();
+              const numYears = parseInt(ageStr) || 1;
+              birthDate.setFullYear(birthDate.getFullYear() - numYears);
+
+              const payload = {
+                cowId: formData.get('tagId') as string,
+                name: formData.get('tagId') as string,
                 breed: formData.get('breed') as string,
-                age: formData.get('age') as string,
                 gender: formData.get('gender') as string,
-                weight: Number(formData.get('weight')) || 1000,
-                status: 'normal',
-                lastSync: 'Just now',
-                trend: 'stable',
-                health: 'Good'
+                birthDate: birthDate.toISOString()
               };
-              setHerdData([newCow, ...herdData]);
-              setShowAddCowModal(false); 
+
+              fetch('/api/cows', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+              }).then(() => {
+                const initialWeight = formData.get('weight');
+                if (initialWeight) {
+                  return fetch(`/api/cows/${payload.cowId}/weights`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ weight: Number(initialWeight), deviceId: 'MANUAL' })
+                  });
+                }
+              }).then(() => {
+                fetchCows();
+                setShowAddCowModal(false); 
+              }).catch(err => console.error('Error adding cow:', err));
             }}>
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 sm:col-span-1">
