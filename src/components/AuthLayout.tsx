@@ -1,17 +1,23 @@
 import React from 'react';
+import authBg from '../assets/auth-bg.avif';
 
 export function AuthLayout({ children, title, subtitle }: { children: React.ReactNode, title: string, subtitle: string }) {
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center justify-center gap-2">
-          CowFit Pro
-        </h2>
-        <h2 className="mt-6 text-2xl font-bold text-gray-900">{title}</h2>
-        <p className="mt-2 text-sm text-gray-600">{subtitle}</p>
+    <div className="min-h-screen w-full flex font-sans bg-white">
+      {/* Left Panel - Branding */}
+      <div 
+        className="hidden lg:flex lg:w-[60%] relative overflow-hidden flex-col justify-center items-start px-20 bg-cover bg-center"
+        style={{ backgroundImage: `url(${authBg})` }}
+      >
+        <div className="absolute inset-0 bg-[#0062ff]/80 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-sm border border-gray-200 rounded-xl sm:px-10">
+
+      {/* Right Panel - Form */}
+      <div className="w-full lg:w-[40%] flex items-center justify-center p-8 bg-white">
+        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-8 duration-1000 fill-mode-both delay-100">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">{title}</h2>
+          <p className="text-gray-500 mb-10">{subtitle}</p>
           {children}
         </div>
       </div>
